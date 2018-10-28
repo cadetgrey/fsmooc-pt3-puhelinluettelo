@@ -32,6 +32,7 @@ let contacts = [
 app.use(cors())
 app.use(bodyParser.json())
 app.use(morgan(':method :url :requestData :status :res[content-length] - :response-time ms'))
+app.use(express.static('build'))
 
 const generateStatus = () => {
     return `<p>puhelinluettelossa ${contacts.length} henkilön tiedot</p>
