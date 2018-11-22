@@ -6,91 +6,88 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 morgan.token('requestData', function(req, res) { return JSON.stringify(req.body) })
 
-let contacts = [
-    {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-    },
-    {
-        "name": "Martti Tienari",
-        "number": "040-123456",
-        "id": 2
-    },
-    {
-        "name": "Arto Järvinen",
-        "number": "040-123456",
-        "id": 3
-    },
-    {
-        "name": "Lea Kutvonen",
-        "number": "040-123456",
-        "id": 4
-    }
-]
+const Contact = require('./models/contact')
 
 app.use(cors())
 app.use(bodyParser.json())
 app.use(morgan(':method :url :requestData :status :res[content-length] - :response-time ms'))
 app.use(express.static('build'))
 
-const generateStatus = () => {
-    return `<p>puhelinluettelossa ${contacts.length} henkilön tiedot</p>
-    <p>${new Date()}</p>`
-}
-
 app.get('/api/persons', (req, res) => {
-    res.send(contacts)
+    Contact
+        .find({})
+        .then(contacts => {
+            res.json(contacts.map(Contact.format))
+        })
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const contact = contacts.find(contact => contact.id === id)
-
-    if (contact) {
-        res.json(contact)
-    } else {
-        res.status(404).end()
-    }
+    Contact
+        .findById(req.params.id)
+        .then(contact => {
+            if (contact) {
+                res.json(Contact.format(contact))
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(400).send({ error: 'malformatted id' })
+        })
 })
 
 app.get('/info', (req, res) => {
-    res.send(generateStatus())
+    Contact.countDocuments({}, (err, count) => {
+        res.send(`<p>puhelinluettelossa ${count} henkilön tiedot</p>
+        <p>${new Date()}</p>`)
+    })
 })
 
-const generateId = () => {
-    return Math.ceil(Math.random() * 100000)
-}
-
-const existingContact = (name) => {
-    return contacts.find(contact => contact.name === name)
-}
-
-app.post('/api/persons/', (req, res) => {
+app.post('/api/persons', (req, res) => {
     const body = req.body
     
     if (!body.name || !body.number) {
         return res.status(400).json({error: 'pakollisia tietoja puuttuu'})
-    } else if (existingContact(body.name)) {
-        return res.status(400).json({error: 'nimellä löytyy jo yhteystieto'})
     }
+
+    const contact = new Contact({
+        name: body.name,
+        number: body.number
+    })
+
+    contact
+        .save()
+        .then(savedContact => {
+            res.json(Contact.format(savedContact))
+        })
+})
+
+app.put('/api/persons/:id', (req, res) => {
+    const body = req.body
 
     const contact = {
         name: body.name,
-        number: body.number,
-        id: generateId()
+        number: body.number
     }
 
-    contacts = contacts.concat(contact)
-
-    res.json(contact)
+    Contact
+        .findByIdAndUpdate(req.params.id, contact, { new: true })
+        .then(updatedContact => res.json(Contact.format(updatedContact)))
+        .catch(err => {
+            console.log(err)
+            res.status(400).send( { error: 'malformatted id'} )
+        })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    contacts = contacts.filter(contact => contact.id !== id)
-    
-    res.status(204).end()
+    Contact
+        .findByIdAndRemove(req.params.id)
+        .then(result => res.status(204).end())
+        .catch(err => {
+            console.log(err)
+            res.status(400).send({ error: 'malformatted id'})
+        })
 })
 
 const PORT = process.env.PORT || 3001
