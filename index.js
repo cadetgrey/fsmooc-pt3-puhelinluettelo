@@ -13,7 +13,7 @@ app.use(bodyParser.json())
 app.use(morgan(':method :url :requestData :status :res[content-length] - :response-time ms'))
 app.use(express.static('build'))
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/contacts', (req, res) => {
     Contact
         .find({})
         .then(contacts => {
@@ -21,7 +21,7 @@ app.get('/api/persons', (req, res) => {
         })
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/contacts/:id', (req, res) => {
     Contact
         .findById(req.params.id)
         .then(contact => {
@@ -44,7 +44,7 @@ app.get('/info', (req, res) => {
     })
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/contacts', (req, res) => {
     const body = req.body
     
     if (!body.name || !body.number) {
@@ -58,12 +58,13 @@ app.post('/api/persons', (req, res) => {
 
     contact
         .save()
-        .then(savedContact => {
-            res.json(Contact.format(savedContact))
+        .then(Contact.format)
+        .then(savedAndFormattedContact => {
+            res.json(savedAndFormattedContact)
         })
 })
 
-app.put('/api/persons/:id', (req, res) => {
+app.put('/api/contacts/:id', (req, res) => {
     const body = req.body
 
     const contact = {
@@ -73,14 +74,17 @@ app.put('/api/persons/:id', (req, res) => {
 
     Contact
         .findByIdAndUpdate(req.params.id, contact, { new: true })
-        .then(updatedContact => res.json(Contact.format(updatedContact)))
+        .then(Contact.format)
+        .then(updatedAndFormattedContact => {
+            res.json(updatedAndFormattedContact)
+        })
         .catch(err => {
             console.log(err)
             res.status(400).send( { error: 'malformatted id'} )
         })
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/contacts/:id', (req, res) => {
     Contact
         .findByIdAndRemove(req.params.id)
         .then(result => res.status(204).end())

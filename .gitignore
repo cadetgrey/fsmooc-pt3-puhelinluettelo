@@ -2,3 +2,5 @@ node_modules
 mongo.js
 kokeilu.js
 stockContacts.json
+config
+.env
