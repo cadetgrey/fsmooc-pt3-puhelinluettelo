@@ -48,7 +48,7 @@ app.post('/api/contacts', (req, res) => {
     const body = req.body
     
     if (!body.name || !body.number) {
-        return res.status(400).json({error: 'pakollisia tietoja puuttuu'})
+        return res.status(400).json({ error: 'required information missing'})
     }
 
     const contact = new Contact({
@@ -61,6 +61,10 @@ app.post('/api/contacts', (req, res) => {
         .then(Contact.format)
         .then(savedAndFormattedContact => {
             res.json(savedAndFormattedContact)
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(400).send({ error: err.message })
         })
 })
 
@@ -80,7 +84,7 @@ app.put('/api/contacts/:id', (req, res) => {
         })
         .catch(err => {
             console.log(err)
-            res.status(400).send( { error: 'malformatted id'} )
+            res.status(400).send({ error: 'malformatted id'})
         })
 })
 

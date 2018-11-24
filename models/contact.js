@@ -9,10 +9,27 @@ const url = process.env.MONGODB_URI
 mongoose.connect(url, { useNewUrlParser: true })
 
 const contactSchema = new mongoose.Schema({
-    name: String,
+    name: {
+        type: String,
+        validate: {
+            validator: function (v) {
+                console.log('validator function reached')
+                return Contact
+                    .find({ name: v })
+                    .then(contact => {
+                        let isValid = contact.length == 0
+                        console.log('promise reached', isValid)
+                        return isValid
+                    })
+                    .catch(err => {
+                        throw(err)
+                    })
+            },
+            message: 'Contact with this name already exists'
+        }
+    },
     number: String
 })
-
 contactSchema.statics.format = (contact) => {
     return {
         name: contact.name,
