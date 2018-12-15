@@ -1,0 +1,36 @@
+body {
+  margin: 25px;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  border-radius: 3px;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.notification {
+  display: inline-block;
+  padding: 5px;
+  background-color: #c9d2e0;
+}
+
+.contacts-display {
+  border-spacing: 0px;
+}
+
+.contact td {
+  padding: 5px;
+}
+
+.contact:hover {
+  background-color: #c9d2e0;
+}
