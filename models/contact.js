@@ -18,7 +18,7 @@ const contactSchema = new mongoose.Schema({
                     .find({ name: v })
                     .then(contact => {
                         let isValid = contact.length == 0
-                        console.log('promise reached', isValid)
+                        // console.log('promise reached', isValid)
                         return isValid
                     })
                     .catch(err => {
